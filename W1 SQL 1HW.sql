@@ -78,8 +78,8 @@ NAME: Karl Jablonski -- TITLE: Owner
 
 SELECT CONCAT('NAME: ', ContactName, ' -- TITLE: ', ContactTitle) AS "NAME & TITLE"
 FROM Customers
-WHERE ContactName IN ('Manuel Pereira', 'Jaime Yorres', 'Felipe Izquierdo', 'Karl Jablonski')
-  AND ContactTitle = 'Owner';
+WHERE ContactTitle = 'Owner' 
+	AND Region IS NOT NULL;
 
 
 /* Query 8
@@ -123,7 +123,7 @@ Scottish Longbreads									12.50
 Singaporean Hokkien Fried Mee						14.00
 Sir Rodney's Marmalade								81.00
 Sir Rodney's Scones									10.00
-Sirop d'¨¦rable										28.50
+Sirop d'Â¨Â¦rable										28.50
 Spegesild											12.00
 Steeleye Stout										18.00
 */
@@ -132,6 +132,7 @@ SELECT
     ProductName AS Name, 
     UnitPrice AS ListPrice
 FROM Products
+WHERE ProductName LIKE 'S%'
 ORDER BY ProductName;
 
 
@@ -141,13 +142,13 @@ Your result set should look something like the following. Order the result set b
 The products name should start with either 'O' or 'T' 
 Name                                               ListPrice
 -------------------------------------------------- ----------
-Original Frankfurter gr¨¹ne So?e						13.00
+Original Frankfurter grÂ¨Â¹ne So?e						13.00
 Outback Lager										15.00
 Tarte au sucre										49.30
 Teatime Chocolate Biscuits							9.20
-Th¨¹ringer Rostbratwurst								123.79
+ThÂ¨Â¹ringer Rostbratwurst								123.79
 Tofu												23.25
-Tourti¨¨re											7.45
+TourtiÂ¨Â¨re											7.45
 Tunnbr?d											9.00
 */
 
