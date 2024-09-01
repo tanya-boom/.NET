@@ -212,6 +212,7 @@ List top 5 locations (Zip Code) where the products sold most.
 SELECT TOP 5 o.ShipPostalCode AS ZipCode, COUNT(*) AS ProductsSold
 FROM Orders o
 JOIN [Order Details] od ON o.OrderID = od.OrderID
+WHERE o.ShipPostalCode IS NOT NULL
 GROUP BY o.ShipPostalCode
 ORDER BY ProductsSold DESC;
 
@@ -222,10 +223,9 @@ List top 5 locations (Zip Code) where the products sold most in last 25 years.
 SELECT TOP 5 o.ShipPostalCode AS ZipCode, COUNT(*) AS ProductsSold
 FROM Orders o
 JOIN [Order Details] od ON o.OrderID = od.OrderID
-WHERE DATEDIFF(YEAR, o.OrderDate, GETDATE()) <= 25
+WHERE o.ShipPostalCode IS NOT NULL AND DATEDIFF(YEAR, o.OrderDate, GETDATE()) <= 25
 GROUP BY o.ShipPostalCode
 ORDER BY ProductsSold DESC;
-
 
 
 /* Query 17
@@ -243,8 +243,7 @@ List city names which have more than 2 customers, and number of customers in tha
 SELECT City, COUNT(*) AS CustomerCount
 FROM Customers
 GROUP BY City
-HAVING COUNT(*) > 2;
-
+HAVING COUNT(*) >2;
 
 /* Query 19
 List the names of customers who placed orders after 1/1/98 with order date.
@@ -254,52 +253,43 @@ FROM Customers c
 JOIN Orders o ON c.CustomerID = o.CustomerID
 WHERE o.OrderDate > '1998-01-01';
 
+--Latest Order for person who placed mutliple 
+SELECT c.ContactName, MAX(o.OrderDate) AS LatestOrderDate
+FROM Customers c
+JOIN Orders o ON c.CustomerID = o.CustomerID
+WHERE o.OrderDate > '1998-01-01'
+GROUP BY c.ContactName;
 
 
 /* Query 20
 List the names of all customers with most recent order dates 
 */
-SELECT c.ContactName, MAX(o.OrderDate) AS LastOrderDate
+SELECT c.ContactName, MAX(o.OrderDate) AS LatestOrderDate
 FROM Customers c
 JOIN Orders o ON c.CustomerID = o.CustomerID
 GROUP BY c.ContactName
-ORDER BY LastOrderDate DESC;
+ORDER BY LatestOrderDate;
 
 
 /* Query 21
 Display the names of all customers along with the count of products they bought
 */
-SELECT 
-    c.ContactName, 
-    COUNT(od.ProductID) AS ProductCount
-FROM 
-    Customers c
-JOIN 
-    Orders o ON c.CustomerID = o.CustomerID
-JOIN 
-    [Order Details] od ON o.OrderID = od.OrderID
-GROUP BY 
-    c.ContactName;
-
+SELECT c.ContactName, COUNT(od.ProductID) AS ProductCount
+FROM Customers c
+JOIN Orders o ON c.CustomerID = o.CustomerID
+JOIN [Order Details] od ON o.OrderID = od.OrderID
+GROUP BY c.ContactName;
 
 
 /* Query 22
 Display the customer ids who bought more than 100 Products with count of products.
 */
-SELECT 
-    c.CustomerID, 
-    COUNT(od.ProductID) AS ProductCount
-FROM 
-    Customers c
-JOIN 
-    Orders o ON c.CustomerID = o.CustomerID
-JOIN 
-    [Order Details] od ON o.OrderID = od.OrderID
-GROUP BY 
-    c.CustomerID
-HAVING 
-    COUNT(od.ProductID) > 100;
-
+SELECT c.CustomerID, COUNT(od.ProductID) AS ProductCount
+FROM Customers c
+JOIN Orders o ON c.CustomerID = o.CustomerID
+JOIN [Order Details] od ON o.OrderID = od.OrderID
+GROUP BY c.CustomerID
+HAVING COUNT(od.ProductID) > 100;
 
 
 /* Query 23
@@ -307,54 +297,46 @@ List all of the possible ways that suppliers can ship their products. Display th
 Supplier Company Name   	Shipping Company Name
 ----------------------      ----------------------------------
 */
-SELECT 
-    s.CompanyName AS SupplierCompanyName, 
-    sh.CompanyName AS ShippingCompanyName
-FROM 
-    Suppliers s
-JOIN 
-    Shippers sh ON 1=1;
+SELECT s.CompanyName AS [Supplier Company Name], sh.CompanyName AS [Shipping Company Name]
+FROM Suppliers s
+CROSS JOIN Shippers sh
+ORDER BY sh.CompanyName;
 
+SELECT s.CompanyName AS [Supplier Company Name], sh.CompanyName AS [Shipping Company Name]
+FROM Suppliers s
+JOIN Shippers sh ON 1=1;
 
 
 /* Query 24
 Display the products order each day. Show Order date and Product Name.
 */
-SELECT 
-    o.OrderDate, 
-    p.ProductName
-FROM 
-    Orders o
-JOIN 
-    [Order Details] od ON o.OrderID = od.OrderID
-JOIN 
-    Products p ON od.ProductID = p.ProductID
-ORDER BY 
-    o.OrderDate;
-
+SELECT  o.OrderDate, p.ProductName
+FROM Orders o
+JOIN [Order Details] od ON o.OrderID = od.OrderID
+JOIN Products p ON od.ProductID = p.ProductID
+ORDER BY o.OrderDate;
 
 
 /* Query 25
 Displays pairs of employees who have the same job title.
 */
-SELECT 
-    e1.FirstName + ' ' + e1.LastName AS Employee1, 
-    e2.FirstName + ' ' + e2.LastName AS Employee2, 
-    e1.Title
-FROM 
-    Employees e1
-JOIN 
-    Employees e2 ON e1.Title = e2.Title AND e1.EmployeeID < e2.EmployeeID;
+SELECT e1.FirstName + ' ' + e1.LastName AS Employee1,
+       e2.FirstName + ' ' + e2.LastName AS Employee2,
+       e1.Title
+FROM Employees e1
+JOIN Employees e2 ON e1.Title = e2.Title
+WHERE e1.EmployeeID < e2.EmployeeID
+ORDER BY e1.Title, e1.LastName, e2.LastName;
 
 
 /* Query 26
 Display all the Managers who have more than 2 employees reporting to them.
 */
-SELECT e1.EmployeeID, e1.FirstName + ' ' + e1.LastName AS ManagerName, COUNT(e2.EmployeeID) AS NumOfReports
-FROM Employees e1
-JOIN Employees e2 ON e1.EmployeeID = e2.ReportsTo
-GROUP BY e1.EmployeeID, e1.FirstName, e1.LastName
-HAVING COUNT(e2.EmployeeID) > 2;
+SELECT  m.FirstName + ' ' + m.LastName AS Manager, COUNT(e.EmployeeID) AS NumOfReports
+FROM Employees e 
+JOIN Employees m ON e.ReportsTo = m.EmployeeID
+GROUP BY m.FirstName + ' ' + m.LastName
+HAVING COUNT(e.EmployeeID) >2;
 
 
 /* Query 27
@@ -370,7 +352,6 @@ UNION
 SELECT City, CompanyName AS Name, ContactName, 'Supplier' AS Type
 FROM Suppliers
 ORDER BY City, Type;
-
 
 
 /* Query 28
@@ -394,3 +375,4 @@ SELECT t1.F1, t1.F2, t2.F1, t2.F2
 FROM T1 t1
 LEFT OUTER JOIN T2 t2 ON t1.F1 = t2.F1 AND t1.F2 = t2.F2;
 
+ 
