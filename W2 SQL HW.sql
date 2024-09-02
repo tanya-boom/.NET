@@ -209,12 +209,12 @@ GROUP BY p.ProductName;
 /* Query 15
 List top 5 locations (Zip Code) where the products sold most.
 */
-SELECT TOP 5 o.ShipPostalCode AS ZipCode, COUNT(*) AS ProductsSold
-FROM Orders o
-JOIN [Order Details] od ON o.OrderID = od.OrderID
-WHERE o.ShipPostalCode IS NOT NULL
-GROUP BY o.ShipPostalCode
-ORDER BY ProductsSold DESC;
+SELECT TOP 5 s.PostalCode, SUM(od.Quantity) AS TotalQuantity
+FROM Suppliers s
+JOIN Products p ON s.SupplierID = p.SupplierID
+JOIN [Order Details] od ON p.ProductID = od.ProductID
+GROUP BY s.PostalCode
+ORDER BY TotalQuantity DESC;
 
 
 /* Query 16
