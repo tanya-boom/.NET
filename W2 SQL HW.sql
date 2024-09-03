@@ -42,10 +42,7 @@ Tanya Wang
 /* Select master Database */
 Use master
 Go
- 
 
-SELECT *
-FROM Products; 
 
 /* Query 1
 How many products can you find in the Products table?
